@@ -24,7 +24,7 @@ from typeguard import check_argument_types
 
 from espnet2.schedulers.abs_scheduler import AbsBatchStepScheduler
 from espnet2.schedulers.abs_scheduler import AbsScheduler
-from espnet2.torch_utils.device_funcs import to_device
+from espnet2.torch_utils.device_funcs import to_device, get_device
 from espnet2.torch_utils.recursive_op import recursive_average
 from espnet2.train.distributed_utils import DistributedOption
 from espnet2.train.reporter import SubReporter
@@ -133,7 +133,7 @@ class GANTrainer(Trainer):
         all_steps_are_invalid = True
         # [For distributed] Because iteration counts are not always equals between
         # processes, send stop-flag to the other processes if iterator is finished
-        iterator_stop = torch.tensor(0).to("cuda" if ngpu > 0 else "cpu")
+        iterator_stop = torch.tensor(0).to(get_device(ngpu))
 
         start_time = time.perf_counter()
         for iiter, (_, batch) in enumerate(
@@ -145,7 +145,7 @@ class GANTrainer(Trainer):
                 torch.distributed.all_reduce(iterator_stop, ReduceOp.SUM)
                 if iterator_stop > 0:
                     break
-            batch = to_device(batch, "cuda" if ngpu > 0 else "cpu")
+            batch = to_device(batch, get_device(ngpu))
             if no_forward_run:
                 all_steps_are_invalid = False
                 continue
@@ -332,7 +332,7 @@ class GANTrainer(Trainer):
 
         # [For distributed] Because iteration counts are not always equals between
         # processes, send stop-flag to the other processes if iterator is finished
-        iterator_stop = torch.tensor(0).to("cuda" if ngpu > 0 else "cpu")
+        iterator_stop = torch.tensor(0).to(get_device(ngpu))
         for (_, batch) in iterator:
             assert isinstance(batch, dict), type(batch)
             if distributed:
@@ -340,7 +340,7 @@ class GANTrainer(Trainer):
                 if iterator_stop > 0:
                     break
 
-            batch = to_device(batch, "cuda" if ngpu > 0 else "cpu")
+            batch = to_device(batch, get_device(ngpu))
             if no_forward_run:
                 continue
 

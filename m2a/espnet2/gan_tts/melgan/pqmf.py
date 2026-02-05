@@ -11,7 +11,10 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from scipy.signal import kaiser
+try:
+    from scipy.signal.windows import kaiser
+except ImportError:
+    from scipy.signal import kaiser
 
 
 def design_prototype_filter(

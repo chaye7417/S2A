@@ -15,7 +15,7 @@ from typeguard import check_argument_types
 
 from espnet2.fileio.datadir_writer import DatadirWriter
 from espnet2.fileio.npy_scp import NpyScpWriter
-from espnet2.torch_utils.device_funcs import to_device
+from espnet2.torch_utils.device_funcs import to_device, get_device
 from espnet2.torch_utils.forward_adaptor import ForwardAdaptor
 from espnet2.train.abs_espnet_model import AbsESPnetModel
 
@@ -52,7 +52,7 @@ def collect_stats(
 
         with DatadirWriter(output_dir / mode) as datadir_writer:
             for iiter, (keys, batch) in enumerate(itr, 1):
-                batch = to_device(batch, "cuda" if ngpu > 0 else "cpu")
+                batch = to_device(batch, get_device(ngpu))
 
                 # 1. Write shape file
                 # TODO: Xuan: How to convert text to index sequence in ljspeech?

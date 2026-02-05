@@ -28,7 +28,7 @@ from espnet.utils.cli_utils import get_commandline_args
 from espnet2.fileio.npy_scp import NpyScpWriter
 from espnet2.gan_mta.vits import VITS
 from espnet2.tasks.mta import MTATask
-from espnet2.torch_utils.device_funcs import to_device
+from espnet2.torch_utils.device_funcs import to_device, get_device
 from espnet2.torch_utils.set_all_random_seed import set_all_random_seed
 from espnet2.mta.fastspeech import FastSpeech
 from espnet2.mta.fastspeech2 import FastSpeech2
@@ -350,10 +350,7 @@ def inference(
         format="%(asctime)s (%(module)s:%(lineno)d) %(levelname)s: %(message)s",
     )
 
-    if ngpu >= 1:
-        device = "cuda"
-    else:
-        device = "cpu"
+    device = get_device(ngpu)
 
     # 1. Set random-seed
     set_all_random_seed(seed)

@@ -5,6 +5,28 @@ import numpy as np
 import torch
 
 
+def get_device(ngpu: int = 0) -> str:
+    """Get the best available device based on ngpu setting.
+
+    Args:
+        ngpu: Number of GPUs requested. If > 0, will try to use GPU.
+
+    Returns:
+        Device string: "cuda", "mps", or "cpu"
+    """
+    if ngpu >= 1:
+        if torch.cuda.is_available():
+            return "cuda"
+        elif torch.backends.mps.is_available():
+            return "mps"
+        else:
+            warnings.warn(
+                f"ngpu={ngpu} but no GPU available. Falling back to CPU."
+            )
+            return "cpu"
+    return "cpu"
+
+
 def to_device(data, device=None, dtype=None, non_blocking=False, copy=False):
     """Change the device of object recursively"""
     if isinstance(data, dict):

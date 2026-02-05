@@ -43,6 +43,7 @@ from espnet2.samplers.build_batch_sampler import build_batch_sampler
 from espnet2.samplers.unsorted_batch_sampler import UnsortedBatchSampler
 from espnet2.schedulers.noam_lr import NoamLR
 from espnet2.schedulers.warmup_lr import WarmupLR
+from espnet2.torch_utils.device_funcs import get_device
 from espnet2.torch_utils.load_pretrained_model import load_pretrained_model
 from espnet2.torch_utils.model_summary import model_summary
 from espnet2.torch_utils.pytorch_version import pytorch_cudnn_version
@@ -1100,7 +1101,7 @@ class AbsTask(ABC):
             )
         model = model.to(
             dtype=getattr(torch, args.train_dtype),
-            device="cuda" if args.ngpu > 0 else "cpu",
+            device=get_device(args.ngpu),
         )
         for t in args.freeze_param:
             for k, p in model.named_parameters():
@@ -1796,6 +1797,7 @@ class AbsTask(ABC):
                 # NOTE(kamo): "cuda" for torch.load always indicates cuda:0
                 #   in PyTorch<=1.4
                 device = f"cuda:{torch.cuda.current_device()}"
+            # MPS and CPU can use device string directly
             model.load_state_dict(torch.load(model_file, map_location=device), strict=False)  #NOTE (Xuan): add strict=False
         
         """

@@ -32,7 +32,7 @@ from espnet2.schedulers.abs_scheduler import AbsEpochStepScheduler
 from espnet2.schedulers.abs_scheduler import AbsScheduler
 from espnet2.schedulers.abs_scheduler import AbsValEpochStepScheduler
 from espnet2.torch_utils.add_gradient_noise import add_gradient_noise
-from espnet2.torch_utils.device_funcs import to_device
+from espnet2.torch_utils.device_funcs import to_device, get_device
 from espnet2.torch_utils.recursive_op import recursive_average
 from espnet2.torch_utils.set_all_random_seed import set_all_random_seed
 from espnet2.train.abs_espnet_model import AbsESPnetModel
@@ -476,7 +476,7 @@ class Trainer:
         all_steps_are_invalid = True
         # [For distributed] Because iteration counts are not always equals between
         # processes, send stop-flag to the other processes if iterator is finished
-        iterator_stop = torch.tensor(0).to("cuda" if ngpu > 0 else "cpu")
+        iterator_stop = torch.tensor(0).to(get_device(ngpu))
 
         start_time = time.perf_counter()
         for iiter, (_, batch) in enumerate(
@@ -488,7 +488,7 @@ class Trainer:
                 if iterator_stop > 0:
                     break
                 
-            batch = to_device(batch, "cuda" if ngpu > 0 else "cpu")
+            batch = to_device(batch, get_device(ngpu))
             if no_forward_run:
                 all_steps_are_invalid = False
                 continue
@@ -681,7 +681,7 @@ class Trainer:
 
         # [For distributed] Because iteration counts are not always equals between
         # processes, send stop-flag to the other processes if iterator is finished
-        iterator_stop = torch.tensor(0).to("cuda" if ngpu > 0 else "cpu")
+        iterator_stop = torch.tensor(0).to(get_device(ngpu))
         for (_, batch) in iterator:
             assert isinstance(batch, dict), type(batch)
             if distributed:
@@ -689,7 +689,7 @@ class Trainer:
                 if iterator_stop > 0:
                     break
 
-            batch = to_device(batch, "cuda" if ngpu > 0 else "cpu")
+            batch = to_device(batch, get_device(ngpu))
             if no_forward_run:
                 continue
 
@@ -740,7 +740,7 @@ class Trainer:
                 len(next(iter(batch.values()))),
                 len(ids),
             )
-            batch = to_device(batch, "cuda" if ngpu > 0 else "cpu")
+            batch = to_device(batch, get_device(ngpu))
             if no_forward_run:
                 continue
 

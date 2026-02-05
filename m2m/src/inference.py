@@ -185,9 +185,9 @@ def inference(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     log.info("Starting inferencing!")
     ckpt = torch.load(cfg.ckpt_path, map_location=model.device, weights_only=False)
     if "state_dict" in ckpt:
-        model.load_state_dict(ckpt["state_dict"])
+        model.load_state_dict(ckpt["state_dict"], strict=False)
     else:
-        model.load_state_dict(ckpt)
+        model.load_state_dict(ckpt, strict=False)
     
     model.eval()
     pred_seqs = []
